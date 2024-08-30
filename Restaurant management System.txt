@@ -1,0 +1,105 @@
+import sqlite3
+
+def create_database():
+    conn = sqlite3.connect('restaurant.db')
+    c = conn.cursor()
+    
+    # Create reservations table
+    c.execute('''CREATE TABLE IF NOT EXISTS reservations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    time TEXT NOT NULL,
+                    table_number INTEGER NOT NULL
+                )''')
+    
+    conn.commit()
+    conn.close()
+
+if __name__ == '__main__':
+    create_database()
+
+import sqlite3
+
+DATABASE = 'restaurant.db'
+
+def connect_db():
+    return sqlite3.connect(DATABASE)
+
+def create_reservation(name, time, table_number):
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute('INSERT INTO reservations (name, time, table_number) VALUES (?, ?, ?)',
+              (name, time, table_number))
+    conn.commit()
+    conn.close()
+    print("Reservation created successfully!")
+
+def get_reservations():
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute('SELECT * FROM reservations')
+    reservations = c.fetchall()
+    conn.close()
+    return reservations
+
+def update_reservation(reservation_id, name, time, table_number):
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute('UPDATE reservations SET name = ?, time = ?, table_number = ? WHERE id = ?',
+              (name, time, table_number, reservation_id))
+    conn.commit()
+    conn.close()
+    print("Reservation updated successfully!")
+
+def delete_reservation(reservation_id):
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute('DELETE FROM reservations WHERE id = ?', (reservation_id,))
+    conn.commit()
+    conn.close()
+    print("Reservation deleted successfully!")
+
+def print_reservations(reservations):
+    for reservation in reservations:
+        print(f"ID: {reservation[0]}, Name: {reservation[1]}, Time: {reservation[2]}, Table Number: {reservation[3]}")
+
+def main():
+    while True:
+        print("\nRestaurant Management System")
+        print("1. Create Reservation")
+        print("2. View Reservations")
+        print("3. Update Reservation")
+        print("4. Delete Reservation")
+        print("5. Exit")
+        
+        choice = input("Choose an option: ")
+        
+        if choice == '1':
+            name = input("Enter name: ")
+            time = input("Enter time (HH:MM): ")
+            table_number = int(input("Enter table number: "))
+            create_reservation(name, time, table_number)
+        
+        elif choice == '2':
+            reservations = get_reservations()
+            print_reservations(reservations)
+        
+        elif choice == '3':
+            reservation_id = int(input("Enter reservation ID to update: "))
+            name = input("Enter new name: ")
+            time = input("Enter new time (HH:MM): ")
+            table_number = int(input("Enter new table number: "))
+            update_reservation(reservation_id, name, time, table_number)
+        
+        elif choice == '4':
+            reservation_id = int(input("Enter reservation ID to delete: "))
+            delete_reservation(reservation_id)
+        
+        elif choice == '5':
+            break
+        
+        else:
+            print("Invalid option. Please try again.")
+
+if __name__ == '__main__':
+    main()
